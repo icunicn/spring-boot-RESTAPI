@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org" th:replace="~{layout/base :: layout(~{::main}, 'User Details')}">
+
+<head>
+    <title>User Details - MVC Demo</title>
+</head>
+
+<body>
+    <main th:fragment="main">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <!-- User Details Card -->
+                <div class="card">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">User Details</h4>
+                        <div class="btn-group">
+                            <a th:href="@{'/users/' + ${user.id} + '/edit'}" class="btn btn-warning btn-sm">
+                                <i class="fas fa-edit"></i> Edit
+                            </a>
+                            <button type="button" class="btn btn-danger btn-sm"
+                                th:onclick="'deleteUser(' + ${user.id} + ')'">
+                                <i class="fas fa-trash"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-3 text-center">
+                                <!-- User Avatar Placeholder -->
+                                <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3"
+                                    style="width: 100px; height: 100px; font-size: 2rem;">
+                                    <span th:text="${#strings.substring(user.name, 0, 1)}">J</span>
+                                </div>
+                                <h5 th:text="${user.name}" class="mb-0">John Doe</h5>
+                                <small class="text-muted">User ID: #<span th:text="${user.id}">1</span></small>
+                            </div>
+                            <div class="col-md-9">
+                                <table class="table table-borderless">
+                                    <tbody>
+                                        <tr>
+                                            <th width="30%" class="text-muted">Full Name:</th>
+                                            <td th:text="${user.name}">John Doe</td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Email Address:</th>
+                                            <td>
+                                                <a th:href="'mailto:' + ${user.email}"
+                                                    th:text="${user.email}">john@example.com</a>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">Phone Number:</th>
+                                            <td>
+                                                <span th:if="${user.phone != null and user.phone != ''}"
+                                                    th:text="${user.phone}">123-456-7890</span>
+                                                <span th:if="${user.phone == null or user.phone == ''}"
+                                                    class="text-muted">Not provided</span>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th class="text-muted">User ID:</th>
+                                            <td>
+                                                <code th:text="${user.id}">1</code>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer d-flex justify-content-between">
+                        <a href="/users" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left"></i> Back to List
+                        </a>
+                        <div>
+                            <a th:href="@{'/users/' + ${user.id} + '/edit'}" class="btn btn-primary me-2">
+                                <i class="fas fa-edit"></i> Edit User
+                            </a>
+                            <button type="button" class="btn btn-outline-danger"
+                                th:onclick="'deleteUser(' + ${user.id} + ')'">
+                                <i class="fas fa-trash"></i> Delete User
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Additional Information -->
+                <div class="card mt-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">🔗 Quick Actions</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <h6>Contact Actions:</h6>
+                                <ul class="list-unstyled">
+                                    <li>
+                                        <a th:href="'mailto:' + ${user.email}"
+                                            class="btn btn-outline-primary btn-sm mb-2">
+                                            <i class="fas fa-envelope"></i> Send Email
+                                        </a>
+                                    </li>
+                                    <li th:if="${user.phone != null and user.phone != ''}">
+                                        <a th:href="'tel:' + ${user.phone}" class="btn btn-outline-success btn-sm mb-2">
+                                            <i class="fas fa-phone"></i> Call Phone
+                                        </a>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div class="col-md-6">
+                                <h6>API Actions:</h6>
+                                <ul class="list-unstyled">
+                                    <li>
+                                        <button class="btn btn-outline-info btn-sm mb-2" onclick="viewUserAPI()">
+                                            <i class="fas fa-code"></i> View API Response
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Delete Confirmation Modal -->
+        <div class="modal fade" id="deleteModal" tabindex="-1">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Confirm Delete</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <p>Are you sure you want to delete user <strong th:text="${user.name}">John Doe</strong>?</p>
+                        <p class="text-danger">This action cannot be undone.</p>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-danger" id="confirmDelete">Delete User</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- API Response Modal -->
+        <div class="modal fade" id="apiModal" tabindex="-1">
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">API Response</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div class="modal-body">
+                        <pre id="apiResponse" class="bg-light p-3 rounded"></pre>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <script>
+            function deleteUser(userId) {
+                const modal = new bootstrap.Modal(document.getElementById('deleteModal'));
+                document.getElementById('confirmDelete').onclick = function () {
+                    fetch('/api/users/' + userId, {
+                        method: 'DELETE'
+                    }).then(response => {
+                        if (response.ok) {
+                            window.location.href = '/users';
+                        } else {
+                            alert('Error deleting user');
+                        }
+                    });
+                };
+                modal.show();
+            }
+
+            function viewUserAPI() {
+                const userId = /*[[${user.id}]]*/ 1;
+                fetch('/api/users/' + userId)
+                    .then(response => response.json())
+                    .then(data => {
+                        document.getElementById('apiResponse').textContent = JSON.stringify(data, null, 2);
+                        const modal = new bootstrap.Modal(document.getElementById('apiModal'));
+                        modal.show();
+                    })
+                    .catch(error => {
+                        alert('Error fetching API data');
+                    });
+            }
+        </script>
+    </main>
+</body>
+
+</html>
