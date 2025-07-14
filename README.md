@@ -285,36 +285,6 @@ Run with specific profile:
 3. Test CRUD operations through the web interface
 4. Test API endpoints using curl or Postman
 
-## 🚀 Deployment
-
-### Build for Production
-
-```bash
-./mvnw clean package -DskipTests
-```
-
-### Run Production JAR
-
-```bash
-java -jar target/try-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
-```
-
-### Docker Deployment (Optional)
-
-Create `Dockerfile`:
-
-```dockerfile
-FROM openjdk:17-jdk-slim
-COPY target/try-0.0.1-SNAPSHOT.jar app.jar
-EXPOSE 8080
-ENTRYPOINT ["java", "-jar", "/app.jar"]
-```
-
-Build and run:
-```bash
-docker build -t user-management .
-docker run -p 8080:8080 user-management
-```
 
 ## 📚 Documentation
 
